@@ -4,16 +4,24 @@
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.Statement;
 
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 
 /**
  *
@@ -177,10 +185,14 @@ class Gui extends javax.swing.JFrame {
         pack();
     }// </editor-fold>                        
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) throws SQLException,NullPointerException{
+    @SuppressWarnings("resource")
+	private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) throws SQLException,NullPointerException{
     	java.sql.Connection connect2= DriverManager.getConnection("jdbc:mysql://localhost/timetable","admin","jyoti#123");
     	String dynamics="N",fluid="N",pde="N",tc="N",bs="N",evs="N",manprolab="N";
+    	JOptionPane.showConfirmDialog( frame,"Do You Want to Save the Details?");
     	for(int i=0;i<5;i++){
+    		if(table.isEditing())
+        		table.getCellEditor(i, 2).stopCellEditing();
     		Object obj=(Object)table.getValueAt(i, 0);
     		if("Dynamics".equals(obj))
     			{dynamics=(String) table.getModel().getValueAt(i, 2);
@@ -195,7 +207,8 @@ class Gui extends javax.swing.JFrame {
 			continue;
 			}
     		if("Transform Calculus".equals(obj))
-			{tc=(String) table.getModel().getValueAt(i, 2);
+			{  
+    			tc=(String) table.getModel().getValueAt(i, 2);
 			continue;
 			}
     		if("Biology".equals(obj))
@@ -213,12 +226,14 @@ class Gui extends javax.swing.JFrame {
     		
     	}
     	Date d=jDateChooser1.getDate();
+    	SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+    	String t = sdf.format(d);
     	//String p="INSERT INTO `attendance`(`student`, `date`, `Dynamics`, `Fluid Mechanics`, `PDE`, `Transform Calculus`, `Biology`, `EVS`, `Manpro lab`) VALUES ('RAVI',"+jDateChooser1.getDate().toString()+","+dynamics+","+fluid+","+pde+","+tc+","+bs+","+evs+","+manprolab+")";
     	//PreparedStatement s=(PreparedStatement) connect2.prepareStatement(p);
     	//ResultSet set=s.executeQuery();
     	PreparedStatement st= (PreparedStatement) connect2.prepareStatement("INSERT INTO `attendance`(`student`, `date`, `Dynamics`, `Fluid Mechanics`, `PDE`, `Transform Calculus`, `Biology`, `EVS`, `Manpro lab`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
     	st.setString(1, "RAVI");
-    	st.setNString(2, d.toString());
+    	st.setNString(2, t);
     	st.setString(3, dynamics);
     	st.setString(4, fluid);
     	st.setString(5, pde);
@@ -227,6 +242,13 @@ class Gui extends javax.swing.JFrame {
     	st.setString(8, evs);
     	st.setString(9, manprolab);
     	st.executeUpdate();
+    	table.getTableHeader().setVisible(false);
+    	table.setVisible(false);
+    	 for (int i = 0; i < table.getRowCount(); i++){
+    	      for(int j = 0; j < table.getColumnCount(); j++) {
+    	          table.setValueAt("", i, j);
+    	      }
+    	   }
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) throws SQLException {                                         
         // TODO add your handling code here:
