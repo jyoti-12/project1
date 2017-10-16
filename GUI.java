@@ -189,7 +189,6 @@ class Gui extends javax.swing.JFrame {
 	private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) throws SQLException,NullPointerException{
     	java.sql.Connection connect2= DriverManager.getConnection("jdbc:mysql://localhost/timetable","admin","jyoti#123");
     	String dynamics="N",fluid="N",pde="N",tc="N",bs="N",evs="N",manprolab="N";
-    	JOptionPane.showConfirmDialog( frame,"Do You Want to Save the Details?");
     	for(int i=0;i<5;i++){
     		if(table.isEditing())
         		table.getCellEditor(i, 2).stopCellEditing();
@@ -228,9 +227,16 @@ class Gui extends javax.swing.JFrame {
     	Date d=jDateChooser1.getDate();
     	SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
     	String t = sdf.format(d);
+    	int result=JOptionPane.showConfirmDialog( null,"Do You Want to Save the Details?","warning",JOptionPane.YES_NO_OPTION);
+
     	//String p="INSERT INTO `attendance`(`student`, `date`, `Dynamics`, `Fluid Mechanics`, `PDE`, `Transform Calculus`, `Biology`, `EVS`, `Manpro lab`) VALUES ('RAVI',"+jDateChooser1.getDate().toString()+","+dynamics+","+fluid+","+pde+","+tc+","+bs+","+evs+","+manprolab+")";
     	//PreparedStatement s=(PreparedStatement) connect2.prepareStatement(p);
     	//ResultSet set=s.executeQuery();
+    	if(result==JOptionPane.YES_OPTION){
+    	String s="SELECT * from `attendance` WHERE date = '" + t + "'";
+    	PreparedStatement st1=(PreparedStatement)connect2.prepareStatement(s);
+    	ResultSet set1=st1.executeQuery();
+    	if(!set1.first()){
     	PreparedStatement st= (PreparedStatement) connect2.prepareStatement("INSERT INTO `attendance`(`student`, `date`, `Dynamics`, `Fluid Mechanics`, `PDE`, `Transform Calculus`, `Biology`, `EVS`, `Manpro lab`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
     	st.setString(1, "RAVI");
     	st.setNString(2, t);
@@ -242,6 +248,27 @@ class Gui extends javax.swing.JFrame {
     	st.setString(8, evs);
     	st.setString(9, manprolab);
     	st.executeUpdate();
+    	}
+    	else{
+    		int res=JOptionPane.showConfirmDialog(null,"Data Already Exist . Do you want to override?","warning",JOptionPane.YES_NO_OPTION);
+    		if(res==JOptionPane.YES_OPTION){
+    			String s1="DELETE FROM `attendance` WHERE date = '"+t +"'";
+    			PreparedStatement st2=(PreparedStatement)connect2.prepareStatement(s1);
+    			st2.executeUpdate();
+    			PreparedStatement st= (PreparedStatement) connect2.prepareStatement("INSERT INTO `attendance`(`student`, `date`, `Dynamics`, `Fluid Mechanics`, `PDE`, `Transform Calculus`, `Biology`, `EVS`, `Manpro lab`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
+    	    	st.setString(1, "RAVI");
+    	    	st.setNString(2, t);
+    	    	st.setString(3, dynamics);
+    	    	st.setString(4, fluid);
+    	    	st.setString(5, pde);
+    	    	st.setString(6, tc);
+    	    	st.setString(7, bs);
+    	    	st.setString(8, evs);
+    	    	st.setString(9, manprolab);
+    	    	st.executeUpdate();
+    		}
+    	}
+    	}
     	table.getTableHeader().setVisible(false);
     	table.setVisible(false);
     	 for (int i = 0; i < table.getRowCount(); i++){
@@ -344,7 +371,3 @@ class Gui extends javax.swing.JFrame {
         
 
 }
-
-
-
-
